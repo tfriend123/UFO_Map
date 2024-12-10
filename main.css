@@ -1,0 +1,46 @@
+    #map {
+        width: 1400px;
+        height: 750px;
+        opacity: 1;
+        background-color: #ffffff;
+        /*border: 5px solid #F4C4D2FF; */
+    }
+
+    .info {
+        position: absolute;
+        padding: 6px 8px;
+        font: 20px/22px Arial, Helvetica, sans-serif;
+        background: white;
+        border: 1px solid #ffffff;
+        background: rgba(255,255,255,1);
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        border-radius: 10px;
+        pointer-events: none; /* Allows mouse events to pass through */
+        z-index: 1000;
+        transition: transform 0.05s ease-in-out;
+        color: #7faf22;
+    }
+    .info h4 {
+        margin: 0 0 5px;
+        color: #b24363;
+    }
+
+    .legend {
+        position: absolute;
+        padding: 10px 8px;
+        font: 20px/22px Arial, Helvetica, sans-serif;
+        background: white;
+        background: rgba(255,255,255,.8);
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        border-radius: 10px;
+        pointer-events: none; /* Allows mouse events to pass through */
+        z-index: 1000;
+        transition: transform 0.05s ease-in-out;
+        color: #7faf22;
+    }
+    .legend h4 {
+        font: 30px/22px Arial, Helvetica, bold, sans-serif;
+        padding: 6px 8px;
+        margin: 0 0 5px;
+        color: #cf9c3f;
+    }
