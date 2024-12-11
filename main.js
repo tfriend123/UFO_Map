@@ -26,28 +26,20 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
         var coords = []
         var isThere = false;
         var isOverlap = false;
-
-
-        // – Calculate Statistics ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
-
-        function avgCalc(){
-            var count = 0;
-            for (let i = 0; i < data.length; i++){
-                count += data[i]["duration"];
-            }
-            return (count/data.length)/60;
-        }
-
-        var avgTime = avgCalc();
-        var medianTime = 1800/60 //pulled 1800 from center of data when sorted by ascending value.
+        var chartOn = false;
 
         // – On-Click GeoJson Loader –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
 
         function jsonLoader (map, stateName){
-            if (isActive && stateMap){
+            if (isActive && stateMap) {
                 map.removeLayer(stateMap);
+                container.removeContainer();
                 countryMap.addTo(map);
                 isActive = false;
+            }
+            else{
+                container.addTo(map);
+                barChart();
             }
             d3.dsv(",", "Data/stateCenters.csv", (d) => {
                 return{
@@ -98,6 +90,7 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
                 })
             })
         }
+
         // – Map –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
 
         var map = L.map('map', {
@@ -220,7 +213,7 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
             };
         }
 
-        // – Functions –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
+        // – Highlight –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
 
         function highlightFeature(e) {
             var layer = e.target;
@@ -251,6 +244,7 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
             hideInfoBox();
             map.off('mousemove', onMapMouseMove);
         }
+        // – Toggle Map ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
 
         function toggleMap(e) {
             let mapName = "";
@@ -272,10 +266,23 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
             legend.update(mapName);
         }
 
+        // – On Each Feature –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
+
         function onEachFeature(feature, layer) {
             layer.on({
                 mouseover: highlightFeature,
                 mouseout: resetHighlight,
+                click: toggleMap
+            });
+            layer.on({
+                mouseover: function (e) {
+                    highlightFeature(e);
+                    highlightBar(feature.properties["abbreviation"]); // Highlight bar
+                },
+                mouseout: function (e) {
+                    resetHighlight(e);
+                    resetBarHighlight(); // Reset bar color
+                },
                 click: toggleMap
             });
         }
@@ -325,6 +332,102 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
             style: state_styleLarge,
             onEachFeature: onEachFeature
         }).addTo(map);
+
+        // – Chart Maker –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
+
+        var container = L.control({ position: 'bottomright' });
+
+        container.onAdd = function(){
+            var div = L.DomUtil.create('my_graph', 'chart-container');
+            div.style.width = '500px';
+            div.style.height = '200px';
+            div.style.background = 'white';
+            div.style.border = '4px solid #cf9c3f';
+            div.style.padding = '10px';
+            div.style.overflow = 'hidden';
+            container._div = div;
+            return div;
+        }
+
+        container.removeContainer = function() {
+            map.removeControl(this); // Correctly remove the entire control from the map
+        }
+
+        function barChart () {
+            const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+            const width = 500 - margin.left - margin.right;
+            const height = 200 - margin.top - margin.bottom;
+
+            const svg = d3.select('.chart-container')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const stateDurations = d3.rollups(
+                data,
+                v => d3.median(v, d => d.duration),
+                d => d.state
+            );
+
+            const sortedData = stateDurations.sort((a, b) => b[1] - a[1]);
+
+            const x = d3.scaleBand()
+                .domain(sortedData.map(d => d[0]))
+                .range([0, width])
+                .padding(0.2);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(sortedData, d => d[1])])
+                .nice()
+                .range([height, 0]);
+
+            // Axes
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x))
+                .selectAll('text')
+                .attr('transform', 'rotate(-45)')
+                .style('text-anchor', 'end')
+
+            svg.append("text")
+                .attr("x", width / 2) // Position horizontally at the center of the chart
+                .attr("y", height + 40) // Position below the X-axis
+                .attr("fill", "#b24363") // Text color
+                .attr("text-anchor", "middle") // Center the text
+                .text("Median Duration of Sightings (in seconds)");
+
+            svg.append('g').call(d3.axisLeft(y));
+
+            // Bars
+            svg.selectAll('.bar')
+                .data(sortedData)
+                .join('rect')
+                .attr('class', 'bar')
+                .attr('x', d => x(d[0]))
+                .attr('y', d => y(d[1]))
+                .attr('width', x.bandwidth())
+                .attr('height', d => height - y(d[1]))
+                .attr('fill', '#b24363')
+                .on('mouseover', (event, d) => {
+                    d3.select(event.target).attr('fill', '#7faf22');
+                })
+                .on('mouseout', (event, d) => {
+                    d3.select(event.target).attr('fill', '#b24363');
+                });
+
+            return svg;
+        }
+
+        function highlightBar(stateAbbreviation) {
+            d3.selectAll('.bar')
+                .attr('fill', d => d[0] === stateAbbreviation ? '#7faf22' : '#b24363');
+        }
+
+        function resetBarHighlight() {
+            d3.selectAll('.bar').attr('fill', '#b24363');
+        }
     })
 });
 

@@ -44,3 +44,10 @@
         margin: 0 0 5px;
         color: #cf9c3f;
     }
+    .chart-container {
+        position: relative;
+        width: 100%;
+        height: 400px;
+        transition: opacity 0.5s;
+        opacity: 1;
+    }
