@@ -72,9 +72,8 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
                              var lat = data[i]["lat"];
                              var long = data[i]["long"];
 
-                             if (!citySort(data[i]["city"]) && !latLongSort(lat, long)){
+                             if (!latLongSort(lat, long)){
                                  markerMaker(lat, long, data[i]["comments"], data[i]["city"]);
-                                 cities.push(data[i]["city"]);
                                  coords.push(lat);
                                  coords.push(long);
                              }
@@ -185,7 +184,7 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
             if (name === "UFO Sightings in the US") {
                 this._div.innerHTML = "<h4>" + name + "</h4>" + '<b>' + '<b>' + "Mouseover for sightings <br> Click for state specifics" + '</b></br>';
             } else {
-                this._div.innerHTML = "<h4>" + name + "</h4>" + '<b>' + "Click on a UFO to learn more" + '</b></br>';
+                this._div.innerHTML = "<h4>" + name + "</h4>" + '<b>' + "Click on a UFO to learn more <br> Click the state to leave" + '</b></br>';
             }
 
         }
@@ -286,7 +285,7 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
         function markerMaker(x, y, comment, place){
             marker = L.marker([x, y],
                 {icon: sighting}).addTo(map);
-            marker.bindPopup('<h2>' + place + '</h2>' + comment).openPopup();
+            marker.bindPopup('<h2>' + place + '</h2>' + comment);
             markers.push(marker);
         }
 
@@ -296,19 +295,6 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
             iconAnchor:   [22, 50], // point of the icon which will correspond to marker's location
             popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
         });
-
-        // – City Sorter –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
-
-        function citySort(city){
-            isThere = false;
-            for (let i = 0; i < cities.length; i++){
-                if (cities[i] === city){
-                    isThere = true;
-                    break;
-                }
-            }
-            return isThere;
-        }
 
         // – LongLat Sorter ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
 
@@ -353,4 +339,7 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
     were removed for the sake of loading thousands of points efficiently.
 
     Timothy Friend 12/13/2024
+
+    Map uses d3 elements to load data and geojsons
+        – d3 also determines the color of the heatmap
  */
