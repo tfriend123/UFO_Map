@@ -169,14 +169,16 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
         legend.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'legend');
             this._div.innerHTML = "<h4>UFO Sightings in the US</h4>" + '<b>' +
-                "Mouseover for sightings <br> Click for state specifics" + '</b></br>';
+                "Mouseover for sightings <br> Click for state specifics" + '</b></br>' +
+                "Created by Timothy Friend ©2024";
             return this._div;
         };
 
         legend.update = function (name) {
             if (name === "UFO Sightings in the US") {
                 this._div.innerHTML = "<h4>" + name + "</h4>" + '<b>' + '<b>' +
-                    "Mouseover for sightings <br> Click for state specifics" + '</b></br>';
+                    "Mouseover for sightings <br> Click for state specifics" + '</b></br>' +
+                    "Created by Timothy Friend ©2024";
             } else {
                 this._div.innerHTML = "<h4>" + name + "</h4>" + '<b>' +
                     "Click on a UFO to learn more <br> Click the state to leave " +
@@ -390,7 +392,7 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
                 .nice()
                 .range([height, 0]);
 
-            /*
+            /* x-Axis labels, do not fit in box, so it is explained through color
             svg.append('g')
                 .attr('transform', `translate(0,${height})`)
                 .call(d3.axisBottom(x))
