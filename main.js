@@ -24,22 +24,20 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
         var markers = [];
         var cities = [];
         var coords = []
-        var isThere = false;
         var isOverlap = false;
-        var chartOn = false;
 
         // – On-Click GeoJson Loader –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
 
         function jsonLoader (map, stateName){
             if (isActive && stateMap) {
                 map.removeLayer(stateMap);
-                container.removeContainer();
+                //container.removeContainer();
                 countryMap.addTo(map);
                 isActive = false;
             }
             else{
-                container.addTo(map);
-                barChart();
+                //container.addTo(map);
+                //barChart();
             }
             d3.dsv(",", "Data/stateCenters.csv", (d) => {
                 return{
@@ -253,9 +251,12 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
 
             else if (map.hasLayer(countryMap)) {
                 jsonLoader(map, clickedFeature.properties.name);
+                container.addTo(map);
+                barChart();
                 mapName = clickedFeature.properties.name + " UFO Sightings";
             }
             else {
+                container.removeContainer();
                 map.addLayer(countryMap);
                 map.removeLayer(stateMap);
                 map.setView([38.5, -96], 5);
@@ -339,8 +340,8 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
 
         container.onAdd = function(){
             var div = L.DomUtil.create('my_graph', 'chart-container');
-            div.style.width = '500px';
-            div.style.height = '200px';
+            div.style.width = '350px';
+            div.style.height = '400px';
             div.style.background = 'white';
             div.style.border = '4px solid #cf9c3f';
             div.style.padding = '10px';
@@ -350,13 +351,14 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
         }
 
         container.removeContainer = function() {
+            d3.select("#my_graph").remove();
             map.removeControl(this); // Correctly remove the entire control from the map
         }
 
         function barChart () {
             const margin = { top: 20, right: 20, bottom: 50, left: 50 };
-            const width = 500 - margin.left - margin.right;
-            const height = 200 - margin.top - margin.bottom;
+            const width = 350 - margin.left - margin.right;
+            const height = 400 - margin.top - margin.bottom;
 
             const svg = d3.select('.chart-container')
                 .append('svg')
@@ -383,20 +385,36 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
                 .nice()
                 .range([height, 0]);
 
-            // Axes
+            /*
             svg.append('g')
                 .attr('transform', `translate(0,${height})`)
                 .call(d3.axisBottom(x))
                 .selectAll('text')
                 .attr('transform', 'rotate(-45)')
                 .style('text-anchor', 'end')
+             */
 
             svg.append("text")
                 .attr("x", width / 2) // Position horizontally at the center of the chart
-                .attr("y", height + 40) // Position below the X-axis
-                .attr("fill", "#b24363") // Text color
+                .attr("y", height -300) // Position below the X-axis
+                .attr("fill", "#cf9c3f") // Text color
                 .attr("text-anchor", "middle") // Center the text
                 .text("Median Duration of Sightings (in seconds)");
+
+            svg.append("text")
+                .attr("x", width / 2) // Position horizontally at the center of the chart
+                .attr("y", height + 30) // Position below the X-axis
+                .attr("fill", "#b24363") // Text color
+                .attr("text-anchor", "middle") // Center the text
+                .text("States");
+
+            svg.append("text")
+                .attr("x", -170) // Position horizontally at the center of the chart
+                .attr("y", -40) // Position below the X-axis
+                .attr("fill", "#b24363") // Text color
+                .attr("text-anchor", "middle") // Center the text
+                .attr('transform', 'rotate(-90)')
+                .text("Seconds");
 
             svg.append('g').call(d3.axisLeft(y));
 
