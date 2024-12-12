@@ -467,7 +467,4 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
     were removed for the sake of loading thousands of points efficiently.
 
     Timothy Friend 12/13/2024
-
-    Map uses d3 elements to load data and geojsons
-        – d3 also determines the color of the heatmap
  */
