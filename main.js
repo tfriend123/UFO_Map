@@ -14,7 +14,8 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
                 duration: +d.duration_seconds,
                 lat: +d.latShort,
                 long: +d.LongShort,
-                comments: d.comments
+                comments: d.comments,
+                date: d.date_posted
             };
         }
     }).then((data, err2) => {
@@ -63,7 +64,7 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
                              var long = data[i]["long"];
 
                              if (!latLongSort(lat, long)){
-                                 markerMaker(lat, long, data[i]["comments"], data[i]["city"]);
+                                 markerMaker(lat, long, data[i]["comments"], data[i]["city"], data[i]["date"]);
                                  coords.push(lat);
                                  coords.push(long);
                              }
@@ -167,15 +168,19 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
 
         legend.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'legend');
-            this._div.innerHTML = "<h4>UFO Sightings in the US</h4>" + '<b>' + "Mouseover for sightings <br> Click for state specifics" + '</b></br>';
+            this._div.innerHTML = "<h4>UFO Sightings in the US</h4>" + '<b>' +
+                "Mouseover for sightings <br> Click for state specifics" + '</b></br>';
             return this._div;
         };
 
         legend.update = function (name) {
             if (name === "UFO Sightings in the US") {
-                this._div.innerHTML = "<h4>" + name + "</h4>" + '<b>' + '<b>' + "Mouseover for sightings <br> Click for state specifics" + '</b></br>';
+                this._div.innerHTML = "<h4>" + name + "</h4>" + '<b>' + '<b>' +
+                    "Mouseover for sightings <br> Click for state specifics" + '</b></br>';
             } else {
-                this._div.innerHTML = "<h4>" + name + "</h4>" + '<b>' + "Click on a UFO to learn more <br> Click the state to leave" + '</b></br>';
+                this._div.innerHTML = "<h4>" + name + "</h4>" + '<b>' +
+                    "Click on a UFO to learn more <br> Click the state to leave " +
+                    "<br> Hover over state to see it on chart" + '</b></br>';
             }
 
         }
@@ -211,7 +216,7 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
             };
         }
 
-        // – Highlight –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
+        // – Highlight Map –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
 
         function highlightFeature(e) {
             var layer = e.target;
@@ -290,10 +295,10 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
 
         // – Markers –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– \\
 
-        function markerMaker(x, y, comment, place){
+        function markerMaker(x, y, comment, place, datePost){
             marker = L.marker([x, y],
                 {icon: sighting}).addTo(map);
-            marker.bindPopup('<h2>' + place + '</h2>' + comment);
+            marker.bindPopup('<h2>' + place + ": " + datePost + '</h2>' + comment);
             markers.push(marker);
         }
 
@@ -397,21 +402,21 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
             svg.append("text")
                 .attr("x", width / 2) // Position horizontally at the center of the chart
                 .attr("y", height -300) // Position below the X-axis
-                .attr("fill", "#cf9c3f") // Text color
+                .attr("fill", "#b24363") // Text color
                 .attr("text-anchor", "middle") // Center the text
                 .text("Median Duration of Sightings (in seconds)");
 
             svg.append("text")
                 .attr("x", width / 2) // Position horizontally at the center of the chart
                 .attr("y", height + 30) // Position below the X-axis
-                .attr("fill", "#b24363") // Text color
+                .attr("fill", "#cf9c3f") // Text color
                 .attr("text-anchor", "middle") // Center the text
                 .text("States");
 
             svg.append("text")
                 .attr("x", -170) // Position horizontally at the center of the chart
                 .attr("y", -40) // Position below the X-axis
-                .attr("fill", "#b24363") // Text color
+                .attr("fill", "#cf9c3f") // Text color
                 .attr("text-anchor", "middle") // Center the text
                 .attr('transform', 'rotate(-90)')
                 .text("Seconds");
@@ -427,12 +432,12 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
                 .attr('y', d => y(d[1]))
                 .attr('width', x.bandwidth())
                 .attr('height', d => height - y(d[1]))
-                .attr('fill', '#b24363')
+                .attr('fill', '#cf9c3f')
                 .on('mouseover', (event, d) => {
-                    d3.select(event.target).attr('fill', '#7faf22');
+                    d3.select(event.target).attr('fill', '#b24363');
                 })
                 .on('mouseout', (event, d) => {
-                    d3.select(event.target).attr('fill', '#b24363');
+                    d3.select(event.target).attr('fill', '#cf9c3f');
                 });
 
             return svg;
@@ -440,11 +445,11 @@ d3.json("Data/us-states.json").then((geojson,err1)=> {
 
         function highlightBar(stateAbbreviation) {
             d3.selectAll('.bar')
-                .attr('fill', d => d[0] === stateAbbreviation ? '#7faf22' : '#b24363');
+                .attr('fill', d => d[0] === stateAbbreviation ? '#b24363' : '#cf9c3f');
         }
 
         function resetBarHighlight() {
-            d3.selectAll('.bar').attr('fill', '#b24363');
+            d3.selectAll('.bar').attr('fill', '#cf9c3f');
         }
     })
 });
